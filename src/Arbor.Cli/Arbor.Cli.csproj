@@ -10,8 +10,11 @@
     <PackageId>Arbor</PackageId>
     <Authors>Jonathan Doolittle</Authors>
     <Description>Arbor is a cross-platform tree command that modernizes the Windows tree utility.</Description>
-    <PackageTags>cli;tool;tree;filesystem;directory;dotnet</PackageTags>
+    <PackageTags>cli tool tree filesystem directory dotnet</PackageTags>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <Copyright>Copyright (c) 2025 Jonathan Doolittle</Copyright>
+    <PackageReadmeFile>PACKAGE_README.md</PackageReadmeFile>
+    <PackageReleaseNotes>Initial release.</PackageReleaseNotes>
     <RepositoryUrl>https://github.com/jdoolittle126/arbor</RepositoryUrl>
     <PackageProjectUrl>https://github.com/jdoolittle126/arbor</PackageProjectUrl>
     <RepositoryType>git</RepositoryType>
@@ -25,6 +28,10 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Arbor.Core\Arbor.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\..\PACKAGE_README.md" Pack="true" PackagePath="\" />
   </ItemGroup>
 
 </Project>
