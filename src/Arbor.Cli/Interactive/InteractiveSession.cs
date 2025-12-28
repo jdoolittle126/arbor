@@ -14,21 +14,24 @@ internal sealed class InteractiveSession
     private readonly TreeNode _root;
     private readonly TreeOptions _options;
     private readonly Queue<string> _scriptCommands;
+    private readonly string _rootPath;
     private readonly HashSet<string> _selected = new(StringComparer.OrdinalIgnoreCase);
     private readonly Stack<TreeNode> _breadcrumb = new();
 
     private TreeNode _current;
 
-    public InteractiveSession(IAnsiConsole console, TreeNode root, TreeOptions options, IEnumerable<string> script)
+    public InteractiveSession(IAnsiConsole console, TreeNode root, TreeOptions options, IEnumerable<string> script, string rootPath)
     {
         ArgumentNullException.ThrowIfNull(console);
         ArgumentNullException.ThrowIfNull(root);
         ArgumentNullException.ThrowIfNull(options);
         ArgumentNullException.ThrowIfNull(script);
+        ArgumentNullException.ThrowIfNull(rootPath);
 
         _console = console;
         _root = root;
         _options = options;
+        _rootPath = rootPath;
         _current = root;
         _scriptCommands = new Queue<string>(script.Where(s => !string.IsNullOrWhiteSpace(s)));
     }
@@ -107,7 +110,7 @@ internal sealed class InteractiveSession
                     }
 
                     var finalSelection = new HashSet<string>(_selected, StringComparer.OrdinalIgnoreCase);
-                    var filterCommand = FilterCommandEmitter.CreateFilterCommand(finalSelection, _options, _root.RelativePath);
+                    var filterCommand = FilterCommandEmitter.CreateFilterCommand(finalSelection, _options, _root, _rootPath);
                     return InteractiveSessionResult.Export(finalSelection, filterCommand);
                 case "quit":
                 case "exit":

@@ -91,7 +91,7 @@ public sealed class InteractiveCommand : Command<InteractiveSettings>
             _console.MarkupLine($"[yellow]{warning}[/]");
         }
 
-        var session = new InteractiveSession(_console, result.Root, options, settings.Script);
+        var session = new InteractiveSession(_console, result.Root, options, settings.Script, fullPath);
         var sessionResult = session.Run();
 
         if (sessionResult.Status == InteractiveSessionStatus.Quit || sessionResult.Selected.Count == 0)

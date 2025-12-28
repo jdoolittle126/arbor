@@ -2,7 +2,7 @@
 
 Arbor is a cross-platform tree command that aims to modernize the default Windows `tree` utility. It renders colorful
 directory graphs, understands glob and extension filters, and can surface file metadata such as sizes and timestamps.
-The CLI is built on .NET 8, Spectre.Console, and a functional core that is unit-tested against an in-memory filesystem.
+The CLI is built on .NET 10, Spectre.Console, and a functional core that is unit-tested against an in-memory filesystem.
 
 ## Quick Start
 
@@ -32,7 +32,7 @@ The CLI is built on .NET 8, Spectre.Console, and a functional core that is unit-
 ## Contributing
 
 1. Use conventional commits (`feat:`, `fix:`, `docs:`) so upcoming GitVersion automation can derive semantic versions.
-2. Run `dotnet test` locally, tests are fast and should stay green across Linux and Windows.
+2. Run `dotnet test --project tests/Arbor.Cli.Tests/Arbor.Cli.Tests.csproj` locally; tests are fast and should stay green across Linux and Windows.
 3. When adding features, prefer extending the core domain models and strategies, so we can keep Spectre-specific code thin
    and testable.
 
