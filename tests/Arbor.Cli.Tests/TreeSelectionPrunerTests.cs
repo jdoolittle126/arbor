@@ -41,5 +41,36 @@ public sealed class TreeSelectionPrunerTests
         Assert.Equal(tree.Root.Children.Single(node => node.Name == "src").Children.Count, src.Children.Count);
     }
 
+    [Fact]
+    public void Prune_Should_PruneUnselectedSiblingDirectories()
+    {
+        var (fileSystem, rootPath) = TestFileSystemFactory.Create();
+        var builder = new DirectoryTreeBuilder(fileSystem);
+        var options = TreeOptions.Default with { IncludeFiles = true };
+
+        var tree = builder.Build(rootPath, options);
+        var selection = new HashSet<string> { Normalize("tests/UnitTest.cs") };
+
+        var pruned = TreeSelectionPruner.Prune(tree, selection);
+
+        Assert.DoesNotContain(pruned.Root.Children, node => node.Name == "src");
+        Assert.Contains(pruned.Root.Children, node => node.Name == "tests");
+    }
+
+    [Fact]
+    public void Prune_Should_KeepRoot_WhenRootSelected()
+    {
+        var (fileSystem, rootPath) = TestFileSystemFactory.Create();
+        var builder = new DirectoryTreeBuilder(fileSystem);
+        var options = TreeOptions.Default with { IncludeFiles = true };
+
+        var tree = builder.Build(rootPath, options);
+        var selection = new HashSet<string> { string.Empty };
+
+        var pruned = TreeSelectionPruner.Prune(tree, selection);
+
+        Assert.Equal(tree.Root.Children.Count, pruned.Root.Children.Count);
+    }
+
     private static string Normalize(string path) => path.Replace('\\', '/');
 }

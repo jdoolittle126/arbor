@@ -8,10 +8,13 @@ namespace Arbor.Cli.Interactive;
 
 internal static class FilterCommandEmitter
 {
-    public static string? CreateFilterCommand(IEnumerable<string> selectedPaths, TreeOptions originalOptions, string? rootPath)
+    public static string? CreateFilterCommand(IEnumerable<string> selectedPaths, TreeOptions originalOptions, TreeNode root, string? rootPath)
     {
         ArgumentNullException.ThrowIfNull(selectedPaths);
         ArgumentNullException.ThrowIfNull(originalOptions);
+        ArgumentNullException.ThrowIfNull(root);
+
+        var directoryIndex = BuildDirectoryIndex(root);
 
         var normalized = selectedPaths
             .Where(path => !string.IsNullOrWhiteSpace(path))
@@ -28,18 +31,19 @@ internal static class FilterCommandEmitter
 
         foreach (var path in normalized)
         {
-            if (path.EndsWith("/"))
+            if (directoryIndex.Contains(path))
             {
-                includeDirPatterns.Add(path.TrimEnd('/'));
+                AddDirectoryAndAncestors(includeDirPatterns, path);
+                continue;
             }
-            else if (!path.Contains('/'))
+
+            includeFilePatterns.Add(path);
+
+            var lastSlash = path.LastIndexOf('/');
+            if (lastSlash > 0)
             {
-                includeFilePatterns.Add(path);
-            }
-            else
-            {
-                includeFilePatterns.Add(path);
-                includeDirPatterns.Add(path[..path.LastIndexOf('/')]);
+                var parentPath = path[..lastSlash];
+                AddDirectoryAndAncestors(includeDirPatterns, parentPath);
             }
         }
 
@@ -110,8 +114,53 @@ internal static class FilterCommandEmitter
         return string.Join(' ', arguments);
     }
 
+    private static HashSet<string> BuildDirectoryIndex(TreeNode root)
+    {
+        var directories = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        var stack = new Stack<TreeNode>();
+        stack.Push(root);
+
+        while (stack.Count > 0)
+        {
+            var node = stack.Pop();
+            if (node.Kind != NodeKind.Directory)
+            {
+                continue;
+            }
+
+            directories.Add(Normalize(node.RelativePath));
+            foreach (var child in node.Children)
+            {
+                stack.Push(child);
+            }
+        }
+
+        return directories;
+    }
+
+    private static void AddDirectoryAndAncestors(HashSet<string> includeDirPatterns, string path)
+    {
+        var trimmed = path.Trim('/');
+        if (string.IsNullOrEmpty(trimmed))
+        {
+            return;
+        }
+
+        var segments = trimmed.Split('/', StringSplitOptions.RemoveEmptyEntries);
+        var current = segments[0];
+        includeDirPatterns.Add(current);
+
+        for (var i = 1; i < segments.Length; i++)
+        {
+            current = string.Concat(current, "/", segments[i]);
+            includeDirPatterns.Add(current);
+        }
+    }
+
     private static string Normalize(string path) =>
-        path.Replace('\\', '/');
+        string.IsNullOrWhiteSpace(path)
+            ? string.Empty
+            : path.Replace('\\', '/').Trim().Trim('/');
 
     private static string Escape(string value)
     {
